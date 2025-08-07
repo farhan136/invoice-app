@@ -1,0 +1,732 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Invoice App API",
+        "description": "Dokumentasi API untuk aplikasi invoice.",
+        "contact": {
+            "email": "admin@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "User login",
+                "description": "Authenticate a user and generate a Sanctum token.",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "test@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful authentication",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "access_token": {
+                                            "type": "string",
+                                            "example": "1|G9yA6wzPqL8xUcVd0tKjHnBmMfO..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "User logout",
+                "description": "Invalidate the user's current token.",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/customers": {
+            "get": {
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Get a list of customers",
+                "operationId": "1b873d7b0c63876f30a978b52c4d24d2",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CustomerResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Create a new customer",
+                "operationId": "747630c757eae4c38404384330e68c57",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "1234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Customer created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerResource"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/customers/{customer}": {
+            "get": {
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Get a specific customer",
+                "operationId": "759c7d0a3318870b151c5d02cf5e7108",
+                "parameters": [
+                    {
+                        "name": "customer",
+                        "in": "path",
+                        "description": "Customer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerResource"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Update an existing customer",
+                "operationId": "1cdec79c0426d12f4c705878a1dbd105",
+                "parameters": [
+                    {
+                        "name": "customer",
+                        "in": "path",
+                        "description": "Customer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jane Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0987654321"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Customer updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerResource"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Delete a customer",
+                "operationId": "d9b736a16f6aa96eed5c485bc2346600",
+                "parameters": [
+                    {
+                        "name": "customer",
+                        "in": "path",
+                        "description": "Customer ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Customer deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Customer deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/invoices": {
+            "get": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Get a list of invoices for the authenticated user",
+                "operationId": "2e947f49543378e8d1ac24fc3ebcdcc7",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Invoice"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Create a new invoice",
+                "operationId": "15892ddc0ad0649e0919d15345232fc5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "due_date",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-09-07"
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "item_name",
+                                                "qty",
+                                                "price"
+                                            ],
+                                            "properties": {
+                                                "item_name": {
+                                                    "type": "string",
+                                                    "example": "Service 1"
+                                                },
+                                                "qty": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Invoice created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invoice"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/invoices/{invoice}": {
+            "get": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Get a specific invoice",
+                "operationId": "a81909c52dc527fa7fef63222e1b052e",
+                "parameters": [
+                    {
+                        "name": "invoice",
+                        "in": "path",
+                        "description": "Invoice ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invoice"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Invoice not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Update an existing invoice",
+                "operationId": "8af88d60790a99c0f987103936290092",
+                "parameters": [
+                    {
+                        "name": "invoice",
+                        "in": "path",
+                        "description": "Invoice ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "due_date",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-10-07"
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "item_name",
+                                                "qty",
+                                                "price"
+                                            ],
+                                            "properties": {
+                                                "item_name": {
+                                                    "type": "string",
+                                                    "example": "Updated Item"
+                                                },
+                                                "qty": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 100000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Invoice updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invoice"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Delete an invoice",
+                "operationId": "a60bf154d9b3cb9a2886beff7abba378",
+                "parameters": [
+                    {
+                        "name": "invoice",
+                        "in": "path",
+                        "description": "Invoice ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invoice deleted"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Invoice": {
+                "title": "Invoice",
+                "required": [
+                    "due_date",
+                    "total"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "invoice_number": {
+                        "type": "string",
+                        "example": "INV-20230807-0001"
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2023-09-07"
+                    },
+                    "total": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 175000
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-08-07T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-08-07T12:00:00Z"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/InvoiceItem"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "InvoiceItem": {
+                "title": "InvoiceItem",
+                "required": [
+                    "item_name",
+                    "qty",
+                    "price"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "invoice_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "item_name": {
+                        "type": "string",
+                        "example": "Service 1"
+                    },
+                    "qty": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 50000
+                    },
+                    "subtotal": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 100000
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerResource": {
+                "title": "Customer Resource",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "john@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-01T00:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-02T00:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "API Endpoints for user authentication"
+        },
+        {
+            "name": "Customers",
+            "description": "API Endpoints for customer management"
+        },
+        {
+            "name": "Invoices",
+            "description": "API Endpoints for invoice management"
+        }
+    ]
+}

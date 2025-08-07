@@ -1,61 +1,147 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Invoice Management API - Recruitment Test
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a RESTful API for managing customers and invoices, built with the Laravel framework. It features user authentication, comprehensive API documentation via Swagger, and includes a suite of feature and performance tests.
 
-## About Laravel
+## ✨ Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+  * **Authentication**: Secure user login and logout using Laravel Sanctum API tokens.
+  * **Customer Management**: Full CRUD (Create, Read, Update, Delete) functionality for customers.
+  * **Invoice Management**: Full CRUD functionality for invoices, with line items.
+  * **Authorization**: Users can only view and manage their own invoices.
+  * **API Documentation**: Interactive API documentation powered by Swagger (OpenAPI).
+  * **Performance Testing**: Sequential load tests to benchmark API response times.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+  * **Backend**: Laravel
+  * **Database**: SQLite
+  * **Authentication**: Laravel Sanctum
+  * **API Documentation**: Swagger
+  * **Testing**: PestPHP
 
-## Learning Laravel
+-----
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🚀 Getting Started
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Follow these instructions to get the project up and running on your local machine for development and testing purposes.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
 
-## Laravel Sponsors
+Make sure you have the following software installed:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+  * PHP (\>= 8.2)
+  * Composer
 
-### Premium Partners
+### Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1.  **Clone the repository**
 
-## Contributing
+    ```bash
+    git clone https://github.com/your-username/your-repository-name.git
+    cd your-repository-name
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2.  **Install PHP dependencies**
 
-## Code of Conduct
+    ```bash
+    composer install
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3.  **Create your environment file**
+    Copy the example environment file.
 
-## Security Vulnerabilities
+    ```bash
+    cp .env.example .env
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4.  **Generate an application key**
 
-## License
+    ```bash
+    php artisan key:generate
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+5.  **Set up the SQLite Database**
+    First, create the database file.
+
+    ```bash
+    touch database/database.sqlite
+    ```
+
+    Next, open the `.env` file and ensure the database connection is set to `sqlite`. The `DB_DATABASE` key will be ignored, but it's good practice to leave `DB_CONNECTION` correctly set.
+
+    ```dotenv
+    DB_CONNECTION=sqlite
+    # The following variables will be ignored by the sqlite driver
+    # DB_HOST=127.0.0.1
+    # DB_PORT=3306
+    # DB_DATABASE=laravel
+    # DB_USERNAME=root
+    # DB_PASSWORD=
+    ```
+
+6.  **Run database migrations and seeders**
+    This will create all the necessary tables in your `database.sqlite` file and seed it with a default user.
+
+    ```bash
+    php artisan migrate --seed
+    ```
+
+7.  **Serve the application**
+    You can now start the local development server.
+
+    ```bash
+    php artisan serve
+    ```
+
+    The API will be available at `http://127.0.0.1:8000`.
+
+-----
+
+## 📖 API Documentation (Swagger)
+
+This project uses Swagger for interactive API documentation. Once the application is running, you can access the documentation in your browser.
+
+  * **Swagger UI**: [http://127.0.0.1:8000/api/documentation](http://127.0.0.1:8000/api/documentation)
+
+The raw OpenAPI specification file is also available in the project at `storage/api-docs/api-docs.json`.
+
+-----
+
+## 💻 API Usage
+
+### Authentication
+
+To use the protected endpoints, you first need to log in to get an API token. The database seeder creates a default user with the following credentials:
+
+  * **Email**: `user@example.com`
+  * **Password**: `password`
+
+Send a `POST` request to `/api/login` or use the Swagger UI to test the endpoint. The response will contain an `access_token`. Include this token in the `Authorization` header for all subsequent requests (`Authorization: Bearer <YOUR_ACCESS_TOKEN>`).
+
+### Endpoints
+
+For a complete list of endpoints and to try them live, please visit the **Swagger Documentation**.
+
+-----
+
+## 🧪 Running Tests
+
+This project includes a comprehensive test suite. Instead of using dedicated tools like JMeter, this project includes a suite of **sequential performance tests written with PestPHP** to benchmark API response times under repeated sequential load.
+
+1.  **Run all tests**
+
+    ```bash
+    php artisan test
+    ```
+
+2.  **Run only Feature tests**
+
+    ```bash
+    php artisan test --testsuite=Feature
+    ```
+
+3.  **Run only Performance tests**
+
+    ```bash
+    php artisan test tests/Feature/Performance/
+    ```

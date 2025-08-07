@@ -8,10 +8,56 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 
+/**
+ * @OA\Tag(
+ * name="Invoices",
+ * description="API Endpoints for invoice management"
+ * )
+ * @OA\Schema(
+ * schema="Invoice",
+ * title="Invoice",
+ * required={"due_date", "total"},
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="user_id", type="integer", example=1),
+ * @OA\Property(property="invoice_number", type="string", example="INV-20230807-0001"),
+ * @OA\Property(property="due_date", type="string", format="date", example="2023-09-07"),
+ * @OA\Property(property="total", type="number", format="float", example=175000),
+ * @OA\Property(property="created_at", type="string", format="date-time", example="2023-08-07T12:00:00Z"),
+ * @OA\Property(property="updated_at", type="string", format="date-time", example="2023-08-07T12:00:00Z"),
+ * @OA\Property(property="items", type="array", @OA\Items(ref="#/components/schemas/InvoiceItem"))
+ * )
+ * @OA\Schema(
+ * schema="InvoiceItem",
+ * title="InvoiceItem",
+ * required={"item_name", "qty", "price"},
+ * @OA\Property(property="id", type="integer", example=1),
+ * @OA\Property(property="invoice_id", type="integer", example=1),
+ * @OA\Property(property="item_name", type="string", example="Service 1"),
+ * @OA\Property(property="qty", type="integer", example=2),
+ * @OA\Property(property="price", type="number", format="float", example=50000),
+ * @OA\Property(property="subtotal", type="number", format="float", example=100000)
+ * )
+ */
 class InvoiceController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * @OA\Get(
+     * path="/api/invoices",
+     * tags={"Invoices"},
+     * summary="Get a list of invoices for the authenticated user",
+     * security={{"sanctum":{}}},
+     * @OA\Response(
+     * response=200,
+     * description="Successful operation",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Invoice"))
+     * )
+     * )
+     * )
+     */
     public function index(Request $request)
     {
         $invoices = Invoice::where('user_id', $request->user()->id)
@@ -21,6 +67,34 @@ class InvoiceController extends Controller
         return response()->json($invoices);
     }
 
+    /**
+     * @OA\Post(
+     * path="/api/invoices",
+     * tags={"Invoices"},
+     * summary="Create a new invoice",
+     * security={{"sanctum":{}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"due_date", "items"},
+     * @OA\Property(property="due_date", type="string", format="date", example="2023-09-07"),
+     * @OA\Property(property="items", type="array",
+     * @OA\Items(
+     * required={"item_name", "qty", "price"},
+     * @OA\Property(property="item_name", type="string", example="Service 1"),
+     * @OA\Property(property="qty", type="integer", example=2),
+     * @OA\Property(property="price", type="number", format="float", example=50000)
+     * )
+     * )
+     * )
+     * ),
+     * @OA\Response(
+     * response=201,
+     * description="Invoice created successfully",
+     * @OA\JsonContent(ref="#/components/schemas/Invoice")
+     * )
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -39,6 +113,34 @@ class InvoiceController extends Controller
         return response()->json($invoice->load('items'), 201);
     }
 
+    /**
+     * @OA\Get(
+     * path="/api/invoices/{invoice}",
+     * tags={"Invoices"},
+     * summary="Get a specific invoice",
+     * security={{"sanctum":{}}},
+     * @OA\Parameter(
+     * name="invoice",
+     * in="path",
+     * required=true,
+     * @OA\Schema(type="integer"),
+     * description="Invoice ID"
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Successful operation",
+     * @OA\JsonContent(ref="#/components/schemas/Invoice")
+     * ),
+     * @OA\Response(
+     * response=403,
+     * description="Forbidden"
+     * ),
+     * @OA\Response(
+     * response=404,
+     * description="Invoice not found"
+     * )
+     * )
+     */
     public function show(Invoice $invoice)
     {
         $this->authorize('view', $invoice);
@@ -46,6 +148,41 @@ class InvoiceController extends Controller
         return response()->json($invoice->load('items'));
     }
 
+    /**
+     * @OA\Put(
+     * path="/api/invoices/{invoice}",
+     * tags={"Invoices"},
+     * summary="Update an existing invoice",
+     * security={{"sanctum":{}}},
+     * @OA\Parameter(
+     * name="invoice",
+     * in="path",
+     * required=true,
+     * @OA\Schema(type="integer"),
+     * description="Invoice ID"
+     * ),
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"due_date", "items"},
+     * @OA\Property(property="due_date", type="string", format="date", example="2023-10-07"),
+     * @OA\Property(property="items", type="array",
+     * @OA\Items(
+     * required={"item_name", "qty", "price"},
+     * @OA\Property(property="item_name", type="string", example="Updated Item"),
+     * @OA\Property(property="qty", type="integer", example=3),
+     * @OA\Property(property="price", type="number", format="float", example=100000)
+     * )
+     * )
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Invoice updated successfully",
+     * @OA\JsonContent(ref="#/components/schemas/Invoice")
+     * )
+     * )
+     */
     public function update(Request $request, Invoice $invoice)
     {
         $this->authorize('update', $invoice);
@@ -63,6 +200,28 @@ class InvoiceController extends Controller
         return response()->json($invoice->fresh()->load('items'));
     }
 
+    /**
+     * @OA\Delete(
+     * path="/api/invoices/{invoice}",
+     * tags={"Invoices"},
+     * summary="Delete an invoice",
+     * security={{"sanctum":{}}},
+     * @OA\Parameter(
+     * name="invoice",
+     * in="path",
+     * required=true,
+     * @OA\Schema(type="integer"),
+     * description="Invoice ID"
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Invoice deleted successfully",
+     * @OA\JsonContent(
+     * @OA\Property(property="message", type="string", example="Invoice deleted")
+     * )
+     * )
+     * )
+     */
     public function destroy(Invoice $invoice)
     {
         $this->authorize('delete', $invoice);
