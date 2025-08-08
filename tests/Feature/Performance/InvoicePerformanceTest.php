@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Performance;
 
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,60 +14,47 @@ class InvoicePerformanceTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+    protected Customer $customer;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
+        $this->customer = Customer::factory()->create();
         $this->actingAs($this->user, 'sanctum');
     }
 
     /** @test */
     public function list_invoices_endpoint_is_performant_under_sequential_load()
     {
-        // Setup: Create a realistic number of records
         Invoice::factory()
             ->for($this->user)
+            ->for($this->customer) // Associate with customer
             ->hasItems(3)
             ->count(50)
             ->create();
         
-        // --- SEQUENTIAL LOAD TEST ---
-        $numberOfRequests = 100; // The number of times we will hit the endpoint
-        $durations = [];       // Array to store each request's duration
+        $numberOfRequests = 100;
+        $durations = [];
 
         for ($i = 0; $i < $numberOfRequests; $i++) {
             $startTime = microtime(true);
-            
-            $this->getJson('/api/invoices'); // Hit the endpoint
-
-            $durations[] = (microtime(true) - $startTime) * 1000; // Store duration in ms
+            $this->getJson('/api/invoices');
+            $durations[] = (microtime(true) - $startTime) * 1000;
         }
         
-        // Calculate average and maximum response times
         $averageDuration = array_sum($durations) / count($durations);
         $maxDuration = max($durations);
         
-        $this->assertLessThan(
-            50, // e.g., assert average is below 50ms
-            $averageDuration,
-            "Average response time exceeded 50ms. Actual: {$averageDuration}ms"
-        );
-
-        $this->assertLessThan(
-            250,
-            $maxDuration,
-            "Maximum response time exceeded 250ms. Actual: {$maxDuration}ms"
-        );
-        
+        $this->assertLessThan(50, $averageDuration, "Average response time exceeded 50ms. Actual: {$averageDuration}ms");
+        $this->assertLessThan(250, $maxDuration, "Maximum response time exceeded 250ms. Actual: {$maxDuration}ms");
     }
 
-    // The test for creating an invoice remains the same as it's not a GET request.
     /** @test */
     public function create_invoice_endpoint_is_efficient()
     {
-        // Setup: Prepare request payload
         $payload = [
+            'customer_id' => $this->customer->id,
             'due_date' => now()->addDays(7)->toDateString(),
             'items' => [
                 ['item_name' => 'Service 1', 'qty' => 2, 'price' => 50000],
@@ -80,6 +68,6 @@ class InvoicePerformanceTest extends TestCase
         DB::disableQueryLog();
 
         $response->assertStatus(201);
-        $this->assertLessThanOrEqual(8, count($log), 'The number of queries to create an invoice is too high.');
+        $this->assertLessThanOrEqual(10, count($log), 'The number of queries to create an invoice is too high.');
     }
 }

@@ -10,13 +10,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property-read \App\Models\User|null $user
+ * @property-read \App\Models\Customer|null $customer
  */
 class Invoice extends Model
 {
     use HasFactory;
     
+    // Add 'customer_id' to the fillable array
     protected $fillable = [
-        'user_id', 'invoice_number', 'due_date', 'total'
+        'user_id', 'customer_id', 'invoice_number', 'due_date', 'total'
     ];
 
     public function user(): BelongsTo
@@ -28,8 +30,13 @@ class Invoice extends Model
     {
         return $this->hasMany(InvoiceItem::class);
     }
+    
+    // The relationship to the Customer model
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
 
-    // Calculate and store total
     public function calculateAndStoreTotal(): void
     {
         $total = $this->items->sum('subtotal');
@@ -38,7 +45,6 @@ class Invoice extends Model
 
     public static function createWithItems(array $data): self
     {
-        // Create invoice and items in transaction
         return DB::transaction(function () use ($data) {
             $items = $data['items'];
             unset($data['items']);
@@ -75,11 +81,6 @@ class Invoice extends Model
         });
     }
 
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
     protected static function boot()
     {
         parent::boot();
@@ -93,7 +94,6 @@ class Invoice extends Model
 
     public static function generateInvoiceNumber(): string
     {
-        // Format: INV-YYYYMMDD-XXXX
         $date = now()->format('Ymd');
         $lastId = self::max('id') + 1;
         return 'INV-' . $date . '-' . str_pad($lastId, 4, '0', STR_PAD_LEFT);

@@ -19,12 +19,14 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
  * required={"due_date", "total"},
  * @OA\Property(property="id", type="integer", example=1),
  * @OA\Property(property="user_id", type="integer", example=1),
+ * @OA\Property(property="customer_id", type="integer", example=1),
  * @OA\Property(property="invoice_number", type="string", example="INV-20230807-0001"),
  * @OA\Property(property="due_date", type="string", format="date", example="2023-09-07"),
  * @OA\Property(property="total", type="number", format="float", example=175000),
  * @OA\Property(property="created_at", type="string", format="date-time", example="2023-08-07T12:00:00Z"),
  * @OA\Property(property="updated_at", type="string", format="date-time", example="2023-08-07T12:00:00Z"),
- * @OA\Property(property="items", type="array", @OA\Items(ref="#/components/schemas/InvoiceItem"))
+ * @OA\Property(property="items", type="array", @OA\Items(ref="#/components/schemas/InvoiceItem")),
+ * @OA\Property(property="customer", ref="#/components/schemas/CustomerResource") 
  * )
  * @OA\Schema(
  * schema="InvoiceItem",
@@ -42,26 +44,11 @@ class InvoiceController extends Controller
 {
     use AuthorizesRequests;
 
-    /**
-     * @OA\Get(
-     * path="/api/invoices",
-     * tags={"Invoices"},
-     * summary="Get a list of invoices for the authenticated user",
-     * security={{"sanctum":{}}},
-     * @OA\Response(
-     * response=200,
-     * description="Successful operation",
-     * @OA\JsonContent(
-     * type="object",
-     * @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Invoice"))
-     * )
-     * )
-     * )
-     */
     public function index(Request $request)
     {
         $invoices = Invoice::where('user_id', $request->user()->id)
-            ->with('items')
+            // Eager load customer data along with items
+            ->with(['items', 'customer'])
             ->paginate(10);
 
         return response()->json($invoices);
@@ -76,7 +63,8 @@ class InvoiceController extends Controller
      * @OA\RequestBody(
      * required=true,
      * @OA\JsonContent(
-     * required={"due_date", "items"},
+     * required={"customer_id", "due_date", "items"},
+     * @OA\Property(property="customer_id", type="integer", example=1),
      * @OA\Property(property="due_date", type="string", format="date", example="2023-09-07"),
      * @OA\Property(property="items", type="array",
      * @OA\Items(
@@ -97,8 +85,12 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
+        // Authorize that the user can create an invoice.
+        $this->authorize('create', Invoice::class);
+
         $validated = $request->validate([
-            'invoice_number' => 'nullable|unique:invoices',
+            // Add customer_id validation. It's required and must exist in the customers table.
+            'customer_id' => 'required|exists:customers,id',
             'due_date' => 'required|date',
             'items' => 'required|array|min:1',
             'items.*.item_name' => 'required|string',
@@ -110,42 +102,16 @@ class InvoiceController extends Controller
 
         $invoice = Invoice::createWithItems($validated);
 
-        return response()->json($invoice->load('items'), 201);
+        // Load relations for the response
+        return response()->json($invoice->load(['items', 'customer']), 201);
     }
 
-    /**
-     * @OA\Get(
-     * path="/api/invoices/{invoice}",
-     * tags={"Invoices"},
-     * summary="Get a specific invoice",
-     * security={{"sanctum":{}}},
-     * @OA\Parameter(
-     * name="invoice",
-     * in="path",
-     * required=true,
-     * @OA\Schema(type="integer"),
-     * description="Invoice ID"
-     * ),
-     * @OA\Response(
-     * response=200,
-     * description="Successful operation",
-     * @OA\JsonContent(ref="#/components/schemas/Invoice")
-     * ),
-     * @OA\Response(
-     * response=403,
-     * description="Forbidden"
-     * ),
-     * @OA\Response(
-     * response=404,
-     * description="Invoice not found"
-     * )
-     * )
-     */
     public function show(Invoice $invoice)
     {
         $this->authorize('view', $invoice);
 
-        return response()->json($invoice->load('items'));
+        // Eager load customer data for the response
+        return response()->json($invoice->load(['items', 'customer']));
     }
 
     /**
@@ -164,7 +130,8 @@ class InvoiceController extends Controller
      * @OA\RequestBody(
      * required=true,
      * @OA\JsonContent(
-     * required={"due_date", "items"},
+     * required={"customer_id", "due_date", "items"},
+     * @OA\Property(property="customer_id", type="integer", example=1),
      * @OA\Property(property="due_date", type="string", format="date", example="2023-10-07"),
      * @OA\Property(property="items", type="array",
      * @OA\Items(
@@ -188,6 +155,8 @@ class InvoiceController extends Controller
         $this->authorize('update', $invoice);
 
         $validated = $request->validate([
+            // Add customer_id validation for update as well
+            'customer_id' => 'required|exists:customers,id',
             'due_date' => 'required|date',
             'items' => 'required|array|min:1',
             'items.*.item_name' => 'required|string',
@@ -197,31 +166,10 @@ class InvoiceController extends Controller
 
         $invoice->updateWithItems($validated);
 
-        return response()->json($invoice->fresh()->load('items'));
+        // Return the fresh model with relations loaded
+        return response()->json($invoice->fresh()->load(['items', 'customer']));
     }
 
-    /**
-     * @OA\Delete(
-     * path="/api/invoices/{invoice}",
-     * tags={"Invoices"},
-     * summary="Delete an invoice",
-     * security={{"sanctum":{}}},
-     * @OA\Parameter(
-     * name="invoice",
-     * in="path",
-     * required=true,
-     * @OA\Schema(type="integer"),
-     * description="Invoice ID"
-     * ),
-     * @OA\Response(
-     * response=200,
-     * description="Invoice deleted successfully",
-     * @OA\JsonContent(
-     * @OA\Property(property="message", type="string", example="Invoice deleted")
-     * )
-     * )
-     * )
-     */
     public function destroy(Invoice $invoice)
     {
         $this->authorize('delete', $invoice);

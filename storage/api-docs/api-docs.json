@@ -323,38 +323,6 @@
             }
         },
         "/api/invoices": {
-            "get": {
-                "tags": [
-                    "Invoices"
-                ],
-                "summary": "Get a list of invoices for the authenticated user",
-                "operationId": "2e947f49543378e8d1ac24fc3ebcdcc7",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Invoice"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
             "post": {
                 "tags": [
                     "Invoices"
@@ -367,10 +335,15 @@
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "customer_id",
                                     "due_date",
                                     "items"
                                 ],
                                 "properties": {
+                                    "customer_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "due_date": {
                                         "type": "string",
                                         "format": "date",
@@ -428,47 +401,6 @@
             }
         },
         "/api/invoices/{invoice}": {
-            "get": {
-                "tags": [
-                    "Invoices"
-                ],
-                "summary": "Get a specific invoice",
-                "operationId": "a81909c52dc527fa7fef63222e1b052e",
-                "parameters": [
-                    {
-                        "name": "invoice",
-                        "in": "path",
-                        "description": "Invoice ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Invoice"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Invoice not found"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
             "put": {
                 "tags": [
                     "Invoices"
@@ -492,10 +424,15 @@
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "customer_id",
                                     "due_date",
                                     "items"
                                 ],
                                 "properties": {
+                                    "customer_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "due_date": {
                                         "type": "string",
                                         "format": "date",
@@ -550,47 +487,6 @@
                         "sanctum": []
                     }
                 ]
-            },
-            "delete": {
-                "tags": [
-                    "Invoices"
-                ],
-                "summary": "Delete an invoice",
-                "operationId": "a60bf154d9b3cb9a2886beff7abba378",
-                "parameters": [
-                    {
-                        "name": "invoice",
-                        "in": "path",
-                        "description": "Invoice ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Invoice deleted successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Invoice deleted"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
             }
         }
     },
@@ -608,6 +504,10 @@
                         "example": 1
                     },
                     "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "customer_id": {
                         "type": "integer",
                         "example": 1
                     },
@@ -640,6 +540,9 @@
                         "items": {
                             "$ref": "#/components/schemas/InvoiceItem"
                         }
+                    },
+                    "customer": {
+                        "$ref": "#/components/schemas/CustomerResource"
                     }
                 },
                 "type": "object"
