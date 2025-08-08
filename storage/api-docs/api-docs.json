@@ -323,6 +323,44 @@
             }
         },
         "/api/invoices": {
+            "get": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Get list of invoices",
+                "operationId": "2e947f49543378e8d1ac24fc3ebcdcc7",
+                "responses": {
+                    "200": {
+                        "description": "List of invoices",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Invoice"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Invoices"
@@ -401,6 +439,44 @@
             }
         },
         "/api/invoices/{invoice}": {
+            "get": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Get details of an invoice",
+                "operationId": "a81909c52dc527fa7fef63222e1b052e",
+                "parameters": [
+                    {
+                        "name": "invoice",
+                        "in": "path",
+                        "description": "Invoice ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Invoice"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Invoice not found"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Invoices"
@@ -480,6 +556,37 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Invoices"
+                ],
+                "summary": "Delete an invoice",
+                "operationId": "a60bf154d9b3cb9a2886beff7abba378",
+                "parameters": [
+                    {
+                        "name": "invoice",
+                        "in": "path",
+                        "description": "Invoice ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invoice deleted"
+                    },
+                    "404": {
+                        "description": "Invoice not found"
                     }
                 },
                 "security": [
